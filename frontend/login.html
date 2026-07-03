@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>GradeIQ — Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #07080f;
+      --surface:   #0e1018;
+      --glass:     rgba(255,255,255,0.04);
+      --border:    rgba(255,255,255,0.08);
+      --accent:    #7c6bff;
+      --accent2:   #38bdf8;
+      --success:   #34d399;
+      --danger:    #f87171;
+      --text:      #e8eaf0;
+      --muted:     #6b7280;
+      --display:   'Syne', sans-serif;
+      --body:      'Inter', sans-serif;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--body);
+      overflow: hidden;
+    }
+
+    /* ── Animated mesh background ── */
+    .bg-mesh {
+      position: fixed; inset: 0; z-index: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 10%, rgba(124,107,255,0.18) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 80% 80%, rgba(56,189,248,0.12) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 40% at 50% 50%, rgba(52,211,153,0.06) 0%, transparent 60%);
+    }
+
+    .orb {
+      position: fixed; border-radius: 50%; filter: blur(80px); z-index: 0; pointer-events: none;
+    }
+    .orb-1 {
+      width: 500px; height: 500px;
+      background: rgba(124,107,255,0.15);
+      top: -150px; left: -100px;
+      animation: float1 12s ease-in-out infinite;
+    }
+    .orb-2 {
+      width: 400px; height: 400px;
+      background: rgba(56,189,248,0.1);
+      bottom: -100px; right: -100px;
+      animation: float2 15s ease-in-out infinite;
+    }
+
+    @keyframes float1 {
+      0%,100% { transform: translate(0,0) scale(1); }
+      50% { transform: translate(40px, 30px) scale(1.05); }
+    }
+    @keyframes float2 {
+      0%,100% { transform: translate(0,0) scale(1); }
+      50% { transform: translate(-30px, -20px) scale(1.08); }
+    }
+
+    /* ── Grid lines ── */
+    .grid-lines {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+      background-size: 60px 60px;
+      mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 40%, transparent 100%);
+    }
+
+    /* ── Layout ── */
+    .page {
+      position: relative; z-index: 1;
+      height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    /* ── Left panel ── */
+    .left {
+      display: flex; flex-direction: column;
+      justify-content: center; padding: 60px;
+      border-right: 1px solid var(--border);
+    }
+
+    .brand {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 64px;
+    }
+
+    .brand-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; font-weight: 800; color: #fff;
+      font-family: var(--display);
+      box-shadow: 0 0 20px rgba(124,107,255,0.4);
+    }
+
+    .brand-name {
+      font-family: var(--display);
+      font-size: 20px; font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .hero-label {
+      font-size: 11px; font-weight: 600;
+      letter-spacing: 3px; text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 20px;
+    }
+
+    .hero-title {
+      font-family: var(--display);
+      font-size: clamp(36px, 4vw, 54px);
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -2px;
+      margin-bottom: 24px;
+    }
+
+    .hero-title span {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-desc {
+      font-size: 15px; line-height: 1.7;
+      color: var(--muted); max-width: 380px;
+      margin-bottom: 48px;
+    }
+
+    /* Stats row */
+    .stats {
+      display: flex; gap: 32px;
+    }
+
+    .stat {
+      display: flex; flex-direction: column; gap: 4px;
+    }
+
+    .stat-value {
+      font-family: var(--display);
+      font-size: 28px; font-weight: 800;
+      letter-spacing: -1px;
+      background: linear-gradient(135deg, var(--text), var(--muted));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .stat-label {
+      font-size: 11px; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 1.5px;
+    }
+
+    /* CGPA showcase */
+    .cgpa-showcase {
+      margin-top: 56px;
+      display: flex; align-items: center; gap: 16px;
+      padding: 20px 24px;
+      background: var(--glass);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      backdrop-filter: blur(10px);
+      max-width: 360px;
+    }
+
+    .cgpa-ring {
+      width: 56px; height: 56px; flex-shrink: 0;
+      position: relative;
+    }
+
+    .cgpa-ring svg { transform: rotate(-90deg); }
+
+    .cgpa-ring-text {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--display);
+      font-size: 14px; font-weight: 800;
+      color: var(--accent);
+    }
+
+    .cgpa-info { flex: 1; }
+    .cgpa-info-title {
+      font-size: 13px; font-weight: 600; margin-bottom: 3px;
+    }
+    .cgpa-info-sub { font-size: 11px; color: var(--muted); }
+
+    .cgpa-badge {
+      padding: 4px 10px; border-radius: 20px;
+      background: rgba(52,211,153,0.1);
+      border: 1px solid rgba(52,211,153,0.2);
+      font-size: 11px; font-weight: 600;
+      color: var(--success);
+    }
+
+    /* ── Right panel (form) ── */
+    .right {
+      display: flex; align-items: center; justify-content: center;
+      padding: 60px;
+    }
+
+    .form-card {
+      width: 100%; max-width: 400px;
+      background: var(--glass);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 40px;
+      backdrop-filter: blur(20px);
+      animation: slideUp 0.6s cubic-bezier(0.16,1,0.3,1) both;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .tab-bar {
+      display: flex; gap: 4px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 12px; padding: 4px;
+      margin-bottom: 32px;
+    }
+
+    .tab {
+      flex: 1; padding: 10px;
+      border: none; border-radius: 9px;
+      font-family: var(--body);
+      font-size: 13px; font-weight: 600;
+      cursor: pointer; transition: all 0.2s;
+      color: var(--muted); background: transparent;
+    }
+
+    .tab.active {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 4px 16px rgba(124,107,255,0.35);
+    }
+
+    .form-title {
+      font-family: var(--display);
+      font-size: 22px; font-weight: 700;
+      margin-bottom: 6px; letter-spacing: -0.5px;
+    }
+
+    .form-sub {
+      font-size: 13px; color: var(--muted);
+      margin-bottom: 28px;
+    }
+
+    .field { margin-bottom: 16px; }
+
+    .field label {
+      display: block; font-size: 12px;
+      font-weight: 500; color: var(--muted);
+      margin-bottom: 8px; letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .field input {
+      width: 100%; padding: 13px 16px;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      font-family: var(--body); font-size: 14px;
+      outline: none; transition: all 0.2s;
+    }
+
+    .field input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(124,107,255,0.15);
+      background: rgba(124,107,255,0.05);
+    }
+
+    .field input::placeholder { color: var(--muted); }
+
+    .btn-primary {
+      width: 100%; padding: 14px;
+      background: linear-gradient(135deg, var(--accent), #5b4de8);
+      border: none; border-radius: 12px;
+      color: #fff; font-family: var(--body);
+      font-size: 14px; font-weight: 600;
+      cursor: pointer; margin-top: 8px;
+      transition: all 0.2s;
+      position: relative; overflow: hidden;
+    }
+
+    .btn-primary::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
+      opacity: 0; transition: opacity 0.2s;
+    }
+
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(124,107,255,0.4); }
+    .btn-primary:hover::after { opacity: 1; }
+    .btn-primary:active { transform: translateY(0); }
+
+    .btn-primary.loading {
+      pointer-events: none; opacity: 0.7;
+    }
+
+    .divider {
+      display: flex; align-items: center; gap: 12px;
+      margin: 20px 0;
+    }
+    .divider::before, .divider::after {
+      content: ''; flex: 1; height: 1px;
+      background: var(--border);
+    }
+    .divider span { font-size: 11px; color: var(--muted); }
+
+    .toast {
+      display: none; padding: 12px 16px;
+      border-radius: 10px; font-size: 13px;
+      margin-top: 16px; font-weight: 500;
+      animation: toastIn 0.3s ease;
+    }
+    .toast.success { background: rgba(52,211,153,0.1); border: 1px solid rgba(52,211,153,0.2); color: var(--success); }
+    .toast.error   { background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.2); color: var(--danger); }
+
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateY(-8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* animated counter */
+    @keyframes countUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .stat-value { animation: countUp 0.8s ease both; }
+    .stat:nth-child(2) .stat-value { animation-delay: 0.1s; }
+    .stat:nth-child(3) .stat-value { animation-delay: 0.2s; }
+  </style>
+</head>
+<body>
+
+<div class="bg-mesh"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="grid-lines"></div>
+
+<div class="page">
+
+  <!-- Left: Hero -->
+  <div class="left">
+    <div class="brand">
+      <div class="brand-icon">G</div>
+      <span class="brand-name">GradeIQ</span>
+    </div>
+
+    <p class="hero-label">Academic Intelligence</p>
+    <h1 class="hero-title">Know your grades.<br><span>Own your future.</span></h1>
+    <p class="hero-desc">Track CGPA across every semester, simulate what-if scenarios, and find the exact SGPA you need to hit your target — all in one place.</p>
+
+    <div class="stats">
+      <div class="stat">
+        <span class="stat-value">10.0</span>
+        <span class="stat-label">Max CGPA</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value">∞</span>
+        <span class="stat-label">What-If Scenarios</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value">Free</span>
+        <span class="stat-label">Always</span>
+      </div>
+    </div>
+
+    <div class="cgpa-showcase">
+      <div class="cgpa-ring">
+        <svg width="56" height="56" viewBox="0 0 56 56">
+          <circle cx="28" cy="28" r="22" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="4"/>
+          <circle cx="28" cy="28" r="22" fill="none" stroke="url(#grad)" stroke-width="4"
+            stroke-dasharray="138.2" stroke-dashoffset="20.7" stroke-linecap="round"/>
+          <defs>
+            <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#7c6bff"/>
+              <stop offset="100%" stop-color="#38bdf8"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <div class="cgpa-ring-text">8.5</div>
+      </div>
+      <div class="cgpa-info">
+        <div class="cgpa-info-title">Tanay's CGPA</div>
+        <div class="cgpa-info-sub">6 courses · Semester 3</div>
+      </div>
+      <div class="cgpa-badge">↑ 0.3</div>
+    </div>
+  </div>
+
+  <!-- Right: Form -->
+  <div class="right">
+    <div class="form-card">
+      <div class="tab-bar">
+        <button class="tab active" onclick="switchTab('login', this)">Sign In</button>
+        <button class="tab" onclick="switchTab('register', this)">Sign Up</button>
+      </div>
+
+      <!-- Login form -->
+      <div id="login-form">
+        <div class="form-title">Welcome back</div>
+        <div class="form-sub">Sign in to your GradeIQ account</div>
+
+        <div class="field">
+          <label>Username</label>
+          <input type="text" id="login-username" placeholder="your username" autocomplete="off"/>
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input type="password" id="login-password" placeholder="••••••••"/>
+        </div>
+
+        <button class="btn-primary" onclick="handleLogin(this)">Sign In →</button>
+        <div id="login-toast" class="toast"></div>
+      </div>
+
+      <!-- Register form -->
+      <div id="register-form" style="display:none">
+        <div class="form-title">Create account</div>
+        <div class="form-sub">Start tracking your academic journey</div>
+
+        <div class="field">
+          <label>Username</label>
+          <input type="text" id="reg-username" placeholder="choose a username" autocomplete="off"/>
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input type="password" id="reg-password" placeholder="••••••••"/>
+        </div>
+
+        <button class="btn-primary" onclick="handleRegister(this)">Create Account →</button>
+        <div id="register-toast" class="toast"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API = "http://127.0.0.1:5000";
+
+  function switchTab(tab, el) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('login-form').style.display = tab === 'login' ? 'block' : 'none';
+    document.getElementById('register-form').style.display = tab === 'register' ? 'block' : 'none';
+  }
+
+  function showToast(id, msg, type) {
+    const t = document.getElementById(id);
+    t.textContent = msg;
+    t.className = `toast ${type}`;
+    t.style.display = 'block';
+    setTimeout(() => t.style.display = 'none', 4000);
+  }
+
+  async function handleLogin(btn) {
+    const username = document.getElementById('login-username').value.trim();
+    const password = document.getElementById('login-password').value;
+    if (!username || !password) return showToast('login-toast', 'Please fill in all fields.', 'error');
+
+    btn.textContent = 'Signing in...'; btn.classList.add('loading');
+    try {
+      const res = await fetch(`${API}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('username', data.username);
+        showToast('login-toast', '✓ Login successful! Redirecting...', 'success');
+        setTimeout(() => window.location.href = 'dashboard.html', 1000);
+      } else {
+        showToast('login-toast', data.error || 'Login failed.', 'error');
+      }
+    } catch(e) {
+      showToast('login-toast', 'Cannot connect to server. Is Flask running?', 'error');
+    }
+    btn.textContent = 'Sign In →'; btn.classList.remove('loading');
+  }
+
+  async function handleRegister(btn) {
+    const username = document.getElementById('reg-username').value.trim();
+    const password = document.getElementById('reg-password').value;
+    if (!username || !password) return showToast('register-toast', 'Please fill in all fields.', 'error');
+    if (password.length < 6) return showToast('register-toast', 'Password must be at least 6 characters.', 'error');
+
+    btn.textContent = 'Creating account...'; btn.classList.add('loading');
+    try {
+      const res = await fetch(`${API}/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        showToast('register-toast', '✓ Account created! Please sign in.', 'success');
+        setTimeout(() => switchTab('login', document.querySelectorAll('.tab')[0]), 1500);
+      } else {
+        showToast('register-toast', data.error || 'Registration failed.', 'error');
+      }
+    } catch(e) {
+      showToast('register-toast', 'Cannot connect to server. Is Flask running?', 'error');
+    }
+    btn.textContent = 'Create Account →'; btn.classList.remove('loading');
+  }
+
+  // Enter key support
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      const loginVisible = document.getElementById('login-form').style.display !== 'none';
+      if (loginVisible) handleLogin(document.querySelector('#login-form .btn-primary'));
+      else handleRegister(document.querySelector('#register-form .btn-primary'));
+    }
+  });
+</script>
+</body>
+</html>
