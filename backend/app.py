@@ -3,6 +3,7 @@ from flask_cors import CORS
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 import bcrypt
 import io
+import os
 from db import get_connection
 from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
@@ -14,7 +15,7 @@ app = Flask(__name__)
 CORS(app)
 
 # JWT Config
-app.config["JWT_SECRET_KEY"] = "gradeiq-secret-key-2026"
+app.config["JWT_SECRET_KEY"] = os.environ.get("JWT_SECRET_KEY", "gradeiq-secret-key-2026")
 jwt = JWTManager(app)
 
 # Grade to points mapping
