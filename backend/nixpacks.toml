@@ -1,5 +1,5 @@
 [phases.install]
-cmds = ["pip install -r requirements.txt"]
+cmds = ["pip install flask flask-cors flask-jwt-extended mysql-connector-python bcrypt reportlab pillow gunicorn"]
 
 [start]
-cmd = "gunicorn app:app --bind 0.0.0.0:$PORT"
+cmd = "gunicorn app:app --bind 0.0.0.0:$PORT --timeout 120"
