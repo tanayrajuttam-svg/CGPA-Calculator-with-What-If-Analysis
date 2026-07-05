@@ -12,12 +12,7 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import mm
 
 app = Flask(__name__)
-CORS(app, origins=[
-    "https://stellular-sprite-c8c016.netlify.app",
-    "http://127.0.0.1:5500",
-    "http://localhost:5500",
-    "http://127.0.0.1:5000"
-], supports_credentials=True)
+CORS(app)
 
 # JWT Config
 app.config["JWT_SECRET_KEY"] = os.environ.get("JWT_SECRET_KEY", "gradeiq-secret-key-2026")
